@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Task Manager</title>
+    <title>TaskMaster - Fun Task Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -12,27 +13,165 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        :root {
+            --primary: #6C63FF;
+            --secondary: #4A44C6;
+            --accent: #FF6584;
+            --light: #F5F7FA;
+            --dark: #2C3E50;
+            --success: #2ECC71;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+        }
+
         body {
-            background-color: #f5f7fa;
-            color: #333;
+            background: linear-gradient(135deg, #6C63FF, #4A44C6);
+            color: var(--dark);
             line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Splash Screen Styles */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .splash-content {
+            text-align: center;
+            color: white;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        .logo i {
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(255, 101, 132, 0.5);
+        }
+
+        .splash-title {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .splash-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 101, 132, 0.5);
+        }
+
+        .loading-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .splash-tip {
+            margin-top: 30px;
+            font-style: italic;
+            opacity: 0.8;
+            max-width: 500px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .splash-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.7;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        /* Main App Styles */
+        #app {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .app-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 30px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
             margin-bottom: 30px;
-            font-weight: 600;
         }
 
         .input-section {
@@ -42,62 +181,89 @@
 
         #taskInput {
             flex: 1;
-            padding: 12px 15px;
+            padding: 15px 20px;
             border: 2px solid #e1e8ed;
-            border-radius: 5px 0 0 5px;
+            border-radius: 10px 0 0 10px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
         #taskInput:focus {
-            border-color: #3498db;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
         }
 
         #addBtn {
-            background-color: #3498db;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 0 5px 5px 0;
+            padding: 15px 25px;
+            border-radius: 0 10px 10px 0;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
 
         #addBtn:hover {
-            background-color: #2980b9;
+            background-color: var(--secondary);
+            transform: translateY(-2px);
         }
 
         .filter-section {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .filter-btn {
-            background-color: #ecf0f1;
+            background-color: var(--light);
             border: none;
-            padding: 8px 15px;
-            margin: 0 5px;
+            padding: 10px 20px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .filter-btn.active {
-            background-color: #3498db;
+            background-color: var(--primary);
             color: white;
+        }
+
+        .filter-btn:hover:not(.active) {
+            background-color: #e1e8ed;
         }
 
         .stats {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
-            padding: 10px 0;
+            padding: 15px 0;
             border-bottom: 1px solid #e1e8ed;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
         }
 
         .task-list {
@@ -110,12 +276,15 @@
             padding: 15px;
             margin-bottom: 10px;
             background-color: #f8f9fa;
-            border-radius: 5px;
+            border-radius: 10px;
             transition: all 0.3s;
+            animation: slideIn 0.3s ease;
         }
 
         .task-item:hover {
             background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .task-item.completed {
@@ -124,7 +293,7 @@
 
         .task-text {
             flex: 1;
-            margin-left: 10px;
+            margin-left: 15px;
             font-size: 16px;
         }
 
@@ -134,35 +303,106 @@
         }
 
         .task-checkbox {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .delete-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
+            color: var(--danger);
         }
 
         .delete-btn:hover {
-            background-color: #c0392b;
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .edit-btn {
+            color: var(--warning);
+        }
+
+        .edit-btn:hover {
+            background-color: var(--warning);
+            color: white;
         }
 
         .empty-state {
             text-align: center;
-            padding: 30px;
+            padding: 40px 20px;
             color: #7f8c8d;
         }
 
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #e1e8ed;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            opacity: 0;
+            z-index: 1001;
+        }
+
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(1000px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Responsive Design */
         @media (max-width: 600px) {
             .container {
-                padding: 15px;
+                padding: 20px 15px;
             }
             
             .input-section {
@@ -170,49 +410,123 @@
             }
             
             #taskInput {
-                border-radius: 5px;
+                border-radius: 10px;
                 margin-bottom: 10px;
             }
             
             #addBtn {
-                border-radius: 5px;
+                border-radius: 10px;
+            }
+
+            .splash-title {
+                font-size: 2.5rem;
+            }
+
+            .logo {
+                font-size: 3rem;
+            }
+
+            .loading-bar {
+                width: 250px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Task Manager</h1>
-        
-        <div class="input-section">
-            <input type="text" id="taskInput" placeholder="Enter a new task...">
-            <button id="addBtn">Add Task</button>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-animation" id="splashAnimation"></div>
+        <div class="splash-content">
+            <div class="logo">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <h1 class="splash-title">TaskMaster</h1>
+            <p class="splash-subtitle">Your fun & productive task manager</p>
+            
+            <div class="loading-container">
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loadingProgress"></div>
+                </div>
+                <div class="loading-text" id="loadingText">0%</div>
+            </div>
+            
+            <p class="splash-tip" id="splashTip">Loading your productivity boost...</p>
         </div>
-        
-        <div class="filter-section">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="active">Active</button>
-            <button class="filter-btn" data-filter="completed">Completed</button>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <header class="app-header">
+            <h1 class="app-title">TaskMaster</h1>
+            <p class="app-subtitle">Organize your life, one task at a time</p>
+        </header>
+
+        <div class="container">
+            <div class="input-section">
+                <input type="text" id="taskInput" placeholder="What needs to be done?">
+                <button id="addBtn">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+            </div>
+            
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-list"></i> All
+                </button>
+                <button class="filter-btn" data-filter="active">
+                    <i class="fas fa-clock"></i> Active
+                </button>
+                <button class="filter-btn" data-filter="completed">
+                    <i class="fas fa-check-circle"></i> Completed
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedTasks">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="productivity">0%</div>
+                    <div class="stat-label">Productivity</div>
+                </div>
+            </div>
+            
+            <ul class="task-list" id="taskList">
+                <!-- Tasks will be added here dynamically -->
+            </ul>
         </div>
-        
-        <div class="stats">
-            <span id="totalTasks">Total: 0</span>
-            <span id="completedTasks">Completed: 0</span>
-        </div>
-        
-        <ul class="task-list" id="taskList">
-            <!-- Tasks will be added here dynamically -->
-        </ul>
     </div>
 
     <script>
         // DOM Elements
+        const splashScreen = document.getElementById('splashScreen');
+        const app = document.getElementById('app');
         const taskInput = document.getElementById('taskInput');
         const addBtn = document.getElementById('addBtn');
         const taskList = document.getElementById('taskList');
         const filterBtns = document.querySelectorAll('.filter-btn');
         const totalTasksSpan = document.getElementById('totalTasks');
         const completedTasksSpan = document.getElementById('completedTasks');
+        const productivitySpan = document.getElementById('productivity');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const loadingText = document.getElementById('loadingText');
+        const splashTip = document.getElementById('splashTip');
+        const splashAnimation = document.getElementById('splashAnimation');
+
+        // Tips for splash screen
+        const tips = [
+            "Did you know? Completing tasks releases dopamine in your brain!",
+            "Breaking large tasks into smaller ones increases completion rates.",
+            "The most productive people take regular breaks.",
+            "Color coding tasks can improve organization and recall.",
+            "Setting deadlines increases the likelihood of task completion.",
+            "Reviewing your task list daily keeps you focused on priorities."
+        ];
 
         // Tasks array
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -220,10 +534,10 @@
 
         // Initialize the app
         function init() {
-            renderTasks();
-            updateStats();
+            // Show splash screen first
+            showSplashScreen();
             
-            // Event listeners
+            // Set up event listeners
             addBtn.addEventListener('click', addTask);
             taskInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') addTask();
@@ -239,19 +553,71 @@
             });
         }
 
+        // Show splash screen with animation
+        function showSplashScreen() {
+            // Create floating icons
+            createFloatingIcons();
+            
+            // Update loading progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                loadingProgress.style.width = `${progress}%`;
+                loadingText.textContent = `${Math.round(progress)}%`;
+                
+                // Change tip every 25% progress
+                if (progress % 25 < 5) {
+                    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+                    splashTip.textContent = randomTip;
+                }
+                
+                if (progress === 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        splashScreen.style.opacity = '0';
+                        splashScreen.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            splashScreen.style.display = 'none';
+                            app.style.display = 'block';
+                            renderTasks();
+                            updateStats();
+                        }, 800);
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        // Create floating icons for splash screen
+        function createFloatingIcons() {
+            const icons = ['fa-check-circle', 'fa-list', 'fa-star', 'fa-flag', 'fa-bolt', 'fa-trophy'];
+            const colors = ['#FF6584', '#6C63FF', '#2ECC71', '#F39C12', '#3498DB', '#9B59B6'];
+            
+            for (let i = 0; i < 15; i++) {
+                const icon = document.createElement('i');
+                icon.className = `floating-icon fas ${icons[Math.floor(Math.random() * icons.length)]}`;
+                icon.style.color = colors[Math.floor(Math.random() * colors.length)];
+                icon.style.left = `${Math.random() * 100}%`;
+                icon.style.top = `${Math.random() * 100}%`;
+                icon.style.animationDelay = `${Math.random() * 5}s`;
+                splashAnimation.appendChild(icon);
+            }
+        }
+
         // Add a new task
         function addTask() {
             const taskText = taskInput.value.trim();
             
             if (taskText === '') {
-                alert('Please enter a task!');
+                showNotification('Please enter a task!', 'warning');
                 return;
             }
             
             const newTask = {
                 id: Date.now(),
                 text: taskText,
-                completed: false
+                completed: false,
+                createdAt: new Date().toISOString()
             };
             
             tasks.push(newTask);
@@ -262,13 +628,24 @@
             // Clear input
             taskInput.value = '';
             taskInput.focus();
+            
+            // Show success notification
+            showNotification('Task added successfully!', 'success');
         }
 
         // Toggle task completion
         function toggleTask(id) {
             tasks = tasks.map(task => {
                 if (task.id === id) {
-                    return { ...task, completed: !task.completed };
+                    const updatedTask = { ...task, completed: !task.completed };
+                    
+                    // If task is being completed, show celebration
+                    if (updatedTask.completed && !task.completed) {
+                        createConfetti();
+                        showNotification('Task completed! Great job!', 'success');
+                    }
+                    
+                    return updatedTask;
                 }
                 return task;
             });
@@ -285,6 +662,20 @@
                 saveTasks();
                 renderTasks();
                 updateStats();
+                showNotification('Task deleted', 'info');
+            }
+        }
+
+        // Edit a task
+        function editTask(id) {
+            const task = tasks.find(task => task.id === id);
+            const newText = prompt('Edit your task:', task.text);
+            
+            if (newText !== null && newText.trim() !== '') {
+                task.text = newText.trim();
+                saveTasks();
+                renderTasks();
+                showNotification('Task updated!', 'success');
             }
         }
 
@@ -303,12 +694,37 @@
             if (filteredTasks.length === 0) {
                 const emptyState = document.createElement('div');
                 emptyState.className = 'empty-state';
-                emptyState.textContent = currentFilter === 'all' 
-                    ? 'No tasks yet. Add a task to get started!' 
-                    : `No ${currentFilter} tasks.`;
+                
+                let message, icon;
+                if (currentFilter === 'all') {
+                    message = 'No tasks yet. Add a task to get started!';
+                    icon = 'fa-clipboard-list';
+                } else if (currentFilter === 'active') {
+                    message = 'No active tasks. Great job!';
+                    icon = 'fa-smile-beam';
+                } else {
+                    message = 'No completed tasks yet. Keep going!';
+                    icon = 'fa-tasks';
+                }
+                
+                emptyState.innerHTML = `
+                    <div class="empty-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <h3 class="empty-title">${message}</h3>
+                `;
+                
                 taskList.appendChild(emptyState);
                 return;
             }
+            
+            // Sort tasks: incomplete first, then by creation date
+            filteredTasks.sort((a, b) => {
+                if (a.completed !== b.completed) {
+                    return a.completed ? 1 : -1;
+                }
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
             
             filteredTasks.forEach(task => {
                 const taskItem = document.createElement('li');
@@ -317,14 +733,23 @@
                 taskItem.innerHTML = `
                     <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
                     <span class="task-text">${task.text}</span>
-                    <button class="delete-btn">Delete</button>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 `;
                 
                 const checkbox = taskItem.querySelector('.task-checkbox');
                 const deleteBtn = taskItem.querySelector('.delete-btn');
+                const editBtn = taskItem.querySelector('.edit-btn');
                 
                 checkbox.addEventListener('change', () => toggleTask(task.id));
                 deleteBtn.addEventListener('click', () => deleteTask(task.id));
+                editBtn.addEventListener('click', () => editTask(task.id));
                 
                 taskList.appendChild(taskItem);
             });
@@ -334,14 +759,63 @@
         function updateStats() {
             const totalTasks = tasks.length;
             const completedTasks = tasks.filter(task => task.completed).length;
+            const productivity = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
             
-            totalTasksSpan.textContent = `Total: ${totalTasks}`;
-            completedTasksSpan.textContent = `Completed: ${completedTasks}`;
+            totalTasksSpan.textContent = totalTasks;
+            completedTasksSpan.textContent = completedTasks;
+            productivitySpan.textContent = `${productivity}%`;
+            
+            // Add animation to stats when they change
+            [totalTasksSpan, completedTasksSpan, productivitySpan].forEach(span => {
+                span.style.animation = 'pulse 0.5s ease';
+                setTimeout(() => {
+                    span.style.animation = '';
+                }, 500);
+            });
         }
 
         // Save tasks to localStorage
         function saveTasks() {
             localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // In a real app, you might use a toast library
+            // For simplicity, we'll use alert with emoji
+            const emojis = {
+                success: '✅',
+                warning: '⚠️',
+                info: 'ℹ️',
+                error: '❌'
+            };
+            
+            alert(`${emojis[type] || '💡'} ${message}`);
+        }
+
+        // Create confetti animation
+        function createConfetti() {
+            const colors = ['#FF6584', '#6C63FF', '#2ECC71', '#F39C12', '#3498DB', '#9B59B6'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = '0';
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                document.body.appendChild(confetti);
+                
+                const animationDuration = Math.random() * 3 + 2;
+                confetti.style.animation = `confettiFall ${animationDuration}s linear forwards`;
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000);
+            }
         }
 
         // Initialize the app when the DOM is loaded
